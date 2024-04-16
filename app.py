@@ -40,6 +40,10 @@ def home():
     return render_template('index.html', title=title)
 
 # render crop recommendation form page
+@app.route('/sun-safety-tips')
+def sun_safety_tips():
+    # You can return the template for sun safety tips here
+    return render_template('sun_safety_tips.html')
 
 @app.route('/disease-predict', methods=['GET', 'POST'])
 def disease_prediction():

@@ -26,26 +26,52 @@
 
 <!-- Products & Services -->
 <section class="blog py-5">
-	<div class="container py-md-5">
-		<h3 class="heading mb-sm-5 mb-4 text-center"> Our Services</h3>
-		<div class="row blog-grids">
+    <div class="container py-md-5">
+        <h3 class="heading mb-sm-5 mb-4 text-center"> Our Services</h3>
+        <div class="row blog-grids">
 
-			<div class="col-lg-4 col-md-6 blog-right mt-lg-0 mt-5 pt-lg-0 pt-md-5">
+            <div class="col-lg-4 col-md-6 blog-right mt-lg-0 mt-5 pt-lg-0 pt-md-5">
 
-				<img src="{{ url_for('static', filename='images/skin.jpg') }}" class="img-fluid" alt="">
+                <img src="{{ url_for('static', filename='images/skin.jpg') }}" class="img-fluid" alt="">
 
-				<!-- <img src="images/s4.jpg" class="img-fliud" alt="" /> -->
-				<a href="{{ url_for('disease_prediction') }}">
-					<div class="blog-info">
-						<h4>Skin Cancer Detection</h4>
-						<p class="mt-2">Our AI Model is Having Capacity to classify the skin cancer better.</p>
-					</div>
-				</a>
-			</div>
-		</div>
-	</div>
+                <a href="{{ url_for('disease_prediction') }}">
+                    <div class="blog-info">
+                        <h4>Skin Cancer Detection</h4>
+                        <p class="mt-2">Our AI Model is Having Capacity to classify the skin cancer better.</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Add the following code for Sun Safety Tips -->
+            <div class="col-lg-4 col-md-6 blog-right mt-lg-0 mt-5 pt-lg-0 pt-md-5 sun-safety-box">
+
+                <img src="{{ url_for('static', filename='images/5.jpg') }}" class="img-fluid" alt="">
+
+                <a href="{{ url_for('sun_safety_tips') }}">
+                    <div class="blog-info">
+                        <h4>Sun Safety Tips</h4>
+                        <p class="mt-2">Learn how to protect your skin from harmful UV rays with our sun safety tips.</p>
+                    </div>
+                </a>
+            </div>
+            <!-- End of Sun Safety Tips -->
+
+        </div>
+    </div>
 </section>
 <!-- //Products & Services -->
+
+<!-- Add the following CSS within <style> tags -->
+<style>
+    /* CSS to increase the length of the image in the Sun Safety Tips box */
+    .sun-safety-box .img-fluid {
+        width: 100%;
+        height: 263px; /* Adjust height automatically to maintain aspect ratio */
+        /* Add any other styles as needed */
+    }
+	
+</style>
+
 
 
 <!-- Creating custom grid and hover effect
