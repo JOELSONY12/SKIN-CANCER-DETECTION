@@ -3,48 +3,28 @@
 from flask import Flask, render_template, request, Markup
 import numpy as np
 import pandas as pd
-
+from datetime import datetime
+from flask import render_template
 import requests
 import config
 import pickle
 import io
 from PIL import Image
-
-
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from explainable_ai_code import visualize
 # ==============================================================================================
 
 # -------------------------LOADING THE TRAINED MODELS -----------------------------------------------
 
 # Loading plant disease classification model
 
-disease_dic= ['Apple___Apple_scab',
- 'Apple___Black_rot',
- 'Apple___Cedar_apple_rust',
- 'Apple___healthy',
- 'Corn___Cercospora_leaf_spot Gray_leaf_spot',
- 'Corn___Common_rust',
- 'Corn___Northern_Leaf_Blight',
- 'Corn___healthy',
- 'Grape___Black_rot',
- 'Grape___Esca_(Black_Measles)',
- 'Grape___healthy',
- 'Strawberry___Leaf_scorch',
- 'Strawberry___healthy',
- 'Tomato___Bacterial_spot',
- 'Tomato___Early_blight',
- 'Tomato___Late_blight',
- 'Tomato___Leaf_Mold',
- 'Tomato___Septoria_leaf_spot',
- 'Tomato___Spider_mites Two-spotted_spider_mite',
- 'Tomato___Target_Spot',
- 'Tomato___Tomato_Yellow_Leaf_Curl_Virus',
- 'Tomato___Tomato_mosaic_virus',
- 'Tomato___healthy']
+disease_dic= ["Benign","Melignant"]
 
 
 
-from model_predict  import pred_leaf_disease
-
+#from model_predict  import pred_leaf_disease
+from model_predict2 import detector_model
 # ===============================================================================================
 # ------------------------------------ FLASK APP -------------------------------------------------
 
@@ -56,38 +36,78 @@ app = Flask(__name__)
 
 @ app.route('/')
 def home():
-    title = 'Harvestify - Home'
+    title = 'Skin Cancer Detection'
     return render_template('index.html', title=title)
 
 # render crop recommendation form page
 
 @app.route('/disease-predict', methods=['GET', 'POST'])
 def disease_prediction():
-    title = 'Harvestify - Disease Detection'
-
+    title = 'Skin Cancer Detection'
+    
     if request.method == 'POST':
-        #if 'file' not in request.files:
-         #   return redirect(request.url)
-            file = request.files.get('file')
+        file = request.files.get('file')
 
-            print(file)
-        #if not file:
-         #   return render_template('disease.html', title=title)
-        #try:
-            img1 = file.read()
+        img = Image.open(file)
+        img.save('output.png')
 
-            #print(img)
+        prediction = detector_model("output.png")
+        visualize("output.png", 0.15)
 
-            prediction =pred_leaf_disease(img1)
+        if prediction == "Benign":
+            precaution = "Cancer is Not Melanoma"
+        else:
+            precaution = "Cancer is Melanoma"
 
-            prediction = (str(disease_dic[prediction]))
+        patient_id = request.form.get('patient_id')
+        patient_name = request.form.get('patient_name')
+        date_of_birth = request.form.get('date')
+        gender = request.form.get('gender')
 
-            print(prediction)
-            return render_template('disease-result.html', prediction=prediction, title=title)
-        #except:
-         #   pass
+        # Calculate age based on date of birth
+        dob_date = datetime.strptime(date_of_birth, '%Y-%m-%d')
+        today = datetime.today()
+        age = today.year - dob_date.year - ((today.month, today.day) < (dob_date.month, dob_date.day))
+        
+        # Validate age
+        if age < 0:
+            return "Invalid date of birth. Please enter a valid date."
+
+        print(patient_id, patient_name, age, date_of_birth, gender)
+        
+        # Set up the canvas and page size
+        import os
+
+        # Create a folder with the patient name and ID
+        folder_name = f"{patient_name}_{patient_id}"
+        os.makedirs(folder_name, exist_ok=True)
+
+        # Set up the canvas and page size
+        pdf_file_name = f"{folder_name}/medical_report.pdf"
+        c = canvas.Canvas(pdf_file_name, pagesize=letter)
+
+        # Define the patient data
+        skin_cancer = prediction
+
+        # Write the report title
+        c.setFontSize(16)
+        c.drawString(50, 750, "Medical Report")
+
+        # Write the patient information
+        c.setFontSize(12)
+        c.drawString(50, 700, "Patient ID: " + patient_id)
+        c.drawString(50, 680, "Patient Name: " + patient_name)
+        c.drawString(50, 660, "Age: " + str(age))  # Convert age to string
+        c.drawString(50, 640, "Date: " + date_of_birth)  # Use date_of_birth directly
+        c.drawString(50, 620, "Gender: " + gender)
+        c.drawString(50, 600, "Skin Cancer Diagnosis: " + skin_cancer)
+
+        # Save the PDF file
+        c.save()
+
+        return render_template('disease-result.html', prediction=prediction, precaution=precaution, title=title)
+
     return render_template('disease.html', title=title)
-
 
 # render disease prediction result page
 
